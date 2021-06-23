@@ -15,7 +15,7 @@ The API Wrapper is a way to access the enDAQ Cloud API through a command line to
 this tool you need to put your `API Key` in a `.env`: API_KEY=<Your Key>. Or if you would
 like you can pass in your API Key through the command line using `-k` but that is less
 secure than using a `.env`. Output of all commands except `account` and `attributes` are
-in `csv` files in the `output` folder
+in `csv` files in the ``output`` folder
 
 Usages:
 ++++++
