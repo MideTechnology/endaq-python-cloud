@@ -3,12 +3,10 @@ import sys
 
 import requests
 import os
-from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 import csv
 
-env_path = Path(".") / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv(find_dotenv())
 
 URL = 'https://qvthkmtukh.execute-api.us-west-2.amazonaws.com/master'
 PARAMETERS = {
@@ -17,7 +15,7 @@ PARAMETERS = {
 
 
 def attributes_file(data):
-    att_file = open('output/attributes.csv', 'w')
+    att_file = open('../../output/attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     count = 0
     for x in data:
@@ -52,7 +50,7 @@ def all_files(att, limit):
         data = response.json()['data']
         attributes_file(data)
 
-    data_file = open('output/files.csv', 'w')
+    data_file = open('../../output/files.csv', 'w')
     csv_writer = csv.writer(data_file)
     count = 0
     for x in data:
@@ -67,7 +65,7 @@ def file_by_id(_id):
     response = requests.get(URL + '/api/v1/files/' + _id, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open('output/attributes.csv', 'w')
+    att_file = open('../../output/attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     count = 0
     for x in data['attributes']:
@@ -87,7 +85,7 @@ def file_by_id(_id):
 def devices():
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
     data = response.json()['data']
-    data_file = open('output/devices.csv', 'w')
+    data_file = open('../../output/devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     count = 0
     for x in data:
@@ -101,7 +99,7 @@ def devices():
 def device_by_id(_id):
     response = requests.get(URL + '/api/v1/devices/' + _id, headers=PARAMETERS)
     data = response.json()
-    data_file = open('output/devices.csv', 'w')
+    data_file = open('../../output/devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -130,11 +128,14 @@ if __name__ == '__main__':
     parser.add_argument('--value', '-v', help='Value of new attribute')
     args = parser.parse_args()
 
-    if not os.path.exists('./output/'):
-        os.makedirs('output/')
+    if not os.path.exists('../../output/'):
+        os.makedirs('../../output/')
 
     if args.key != '':
         PARAMETERS.update({"x-api-key": args.key})
+    elif args.key == '' and os.environ.get('API_KEY') is None:
+        sys.exit('Create a .env with API Key or pass it in with --key')
+    
     if args.command == 'account':
         account_info()
     elif args.command == 'files':
