@@ -28,11 +28,9 @@ Usages:
 --type, -t          Attribute Type; options = int, float, string, boolean
 --value, -v         Attribute Value
 
-``
 - python API_wrapper.py files -a -l
 - python API_wrapper.py file-id -i **# additional argument needed**
 - python API_wrapper.py devices -l
 - python API_wrapper.py device-id -i **# additional argument needed**
 - python API_wrapper.py account
 - python API_wrapper.py attribute -n -t -v -i **# additional arguments needed**
-``
