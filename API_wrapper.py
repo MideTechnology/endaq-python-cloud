@@ -140,13 +140,13 @@ if __name__ == '__main__':
     elif args.command == 'files':
         all_files(args.attributes, args.limit)
         print('output can be found in output/files.csv and output/attributes.csv')
-    elif args.command == 'file-id':
+    elif args.command == 'file-id' and args.id != '':
         file_by_id(args.id)
         print(f'output can be found in output/file_{args.id}.csv and output/attributes.csv')
     elif args.command == 'devices':
         devices()
         print('output can be found in devices.csv')
-    elif args.command == 'device-id':
+    elif args.command == 'device-id' and args.id != '':
         device_by_id(args.id)
         print('output can be found in devices.csv')
     elif args.command == 'attribute':
@@ -154,3 +154,5 @@ if __name__ == '__main__':
             post_attribute(args.id, args.name, args.type, args.value)
         else:
             sys.exit('id, name, type, and value can\'t be empty')
+    else:
+        sys.exit('Use -h for help with commands.')
