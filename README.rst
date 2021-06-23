@@ -35,4 +35,7 @@ Usages:
 - python API_wrapper.py device-id -i **# additional argument needed**
 - python API_wrapper.py account
 - python API_wrapper.py attribute -n -t -v -i **# additional arguments needed**
+<<<<<<< HEAD
 ``
+=======
+>>>>>>> 60a18336c45f3aa719e4bf2cf3f6c31939a13829
