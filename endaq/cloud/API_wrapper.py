@@ -1,10 +1,13 @@
 import argparse
+import ntpath
 import sys
 
 import requests
 import os
+from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import csv
+import posixpath
 
 load_dotenv(find_dotenv())
 
@@ -14,8 +17,8 @@ PARAMETERS = {
     }
 
 
-def attributes_file(data):
-    att_file = open('./output/attributes.csv', 'w')
+def attributes_file(data, output):
+    att_file = open(output + 'attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     csv_writer.writerow(['file_id', 'attribute'])
     for x in data:
@@ -24,29 +27,34 @@ def attributes_file(data):
 
 
 def account_info():
+    print(URL + '/api/v1/account/info')
     response = requests.get(URL + '/api/v1/account/info', headers=PARAMETERS)
     print(response.json())
 
 
-def all_files(att, limit):
+def all_files(att, limit, output):
     data = None
     if att == '' and limit == '':
+        print(URL + '/api/v1/files')
         response = requests.get(URL + '/api/v1/files', headers=PARAMETERS)
         data = response.json()['data']
     elif att != '' and limit != '':
+        print(URL + '/api/v1/files?limit=' + limit + '&attributes=' + att)
         response = requests.get(URL + '/api/v1/files?limit=' + limit + '&attributes=' + att,
                                 headers=PARAMETERS)
         data = response.json()['data']
-        attributes_file(data)
+        attributes_file(data, output)
     elif att == '':
+        print(URL + '/api/v1/files?limit=' + limit)
         response = requests.get(URL + '/api/v1/files?limit=' + limit, headers=PARAMETERS)
         data = response.json()['data']
     else:
+        print(URL + '/api/v1/files?attributes=' + att)
         response = requests.get(URL + '/api/v1/files?attributes=' + att, headers=PARAMETERS)
         data = response.json()['data']
-        attributes_file(data)
+        attributes_file(data, output)
 
-    data_file = open('./output/files.csv', 'w')
+    data_file = open(output + 'files.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     headers.remove('attributes')
@@ -56,11 +64,12 @@ def all_files(att, limit):
         csv_writer.writerow(x.values())
 
 
-def file_by_id(id_):
+def file_by_id(id_, output):
+    print(URL + '/api/v1/files/' + id_)
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open('./output/attributes.csv', 'w')
+    att_file = open(output + 'attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     headers = list(data['attributes'][0].keys())
     csv_writer.writerow(headers)
@@ -68,17 +77,18 @@ def file_by_id(id_):
         csv_writer.writerow(x.values())
 
     del data['attributes']
-    data_file = open('output/file_' + id_ + '.csv', 'w')
+    data_file = open(output + 'file_' + id_ + '.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
     csv_writer.writerow(data.values())
 
 
-def devices():
+def devices(output):
+    print(URL + '/api/v1/devices/')
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
     data = response.json()['data']
-    data_file = open('./output/devices.csv', 'w')
+    data_file = open(output + 'devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     csv_writer.writerow(headers)
@@ -86,10 +96,11 @@ def devices():
         csv_writer.writerow(x.values())
 
 
-def device_by_id(id_):
+def device_by_id(id_, output):
+    print(URL + '/api/v1/devices/' + id_)
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
     data = response.json()
-    data_file = open('./output/devices.csv', 'w')
+    data_file = open(output + 'devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -97,6 +108,7 @@ def device_by_id(id_):
 
 
 def post_attribute(id_, name, type_, value):
+    print(URL + '/api/v1/attributes')
     attributes = {"name": name,
                   "type": type_,
                   "value": value,
@@ -116,10 +128,23 @@ if __name__ == '__main__':
     parser.add_argument('--name', '-n', help='Name of new attribute')
     parser.add_argument('--type', '-t', help='Type of element the new attribute is')
     parser.add_argument('--value', '-v', help='Value of new attribute')
+
+    parser.add_argument('--url', '-u', default='', help=argparse.SUPPRESS)
+    parser.add_argument('--output', '-o', default='')
     args = parser.parse_args()
 
-    if not os.path.exists('./output/'):
+    print('API Starting')
+
+    output = './output/'
+    if args.output != '':
+        if not os.path.exists(args.output):
+            os.makedirs(args.output)
+        output = args.output
+    elif not os.path.exists('./output/'):
         os.makedirs('./output/')
+
+    if args.url != '':
+        URL = args.url
 
     if args.key != '':
         PARAMETERS.update({"x-api-key": args.key})
@@ -129,16 +154,16 @@ if __name__ == '__main__':
     if args.command == 'account':
         account_info()
     elif args.command == 'files':
-        all_files(args.attributes, args.limit)
+        all_files(args.attributes, args.limit, output)
         print('output can be found in output/files.csv and output/attributes.csv')
     elif args.command == 'file-id' and args.id != '':
-        file_by_id(args.id)
+        file_by_id(args.id, output)
         print(f'output can be found in output/file_{args.id}.csv and output/attributes.csv')
     elif args.command == 'devices':
-        devices()
+        devices(output)
         print('output can be found in devices.csv')
     elif args.command == 'device-id' and args.id != '':
-        device_by_id(args.id)
+        device_by_id(args.id, output)
         print('output can be found in devices.csv')
     elif args.command == 'attribute':
         if args.name is not None and args.type is not None and args.value is not None and args.id is not None:
