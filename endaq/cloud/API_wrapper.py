@@ -1,13 +1,10 @@
 import argparse
-import ntpath
 import sys
 
 import requests
 import os
-from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import csv
-import posixpath
 
 load_dotenv(find_dotenv())
 
@@ -47,7 +44,6 @@ def all_files(att, limit, _output):
     :param limit: how many files to be listed
     :param _output: location of output files
     """
-    data = None
     if att == '' and limit == '':
         print(URL + '/api/v1/files')
         response = requests.get(URL + '/api/v1/files', headers=PARAMETERS)
