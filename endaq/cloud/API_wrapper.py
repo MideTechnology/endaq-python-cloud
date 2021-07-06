@@ -17,8 +17,13 @@ PARAMETERS = {
     }
 
 
-def attributes_file(data, output):
-    att_file = open(output + 'attributes.csv', 'w')
+def attributes_file(data, _output):
+    """
+    Writes the attributes to a file for user to see
+    :param data: All the attributes for the files
+    :param _output: File path
+    """
+    att_file = open(_output + 'attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     csv_writer.writerow(['file_id', 'attribute'])
     for x in data:
@@ -27,12 +32,21 @@ def attributes_file(data, output):
 
 
 def account_info():
+    """
+    Makes the account API call and prints info to terminal
+    """
     print(URL + '/api/v1/account/info')
     response = requests.get(URL + '/api/v1/account/info', headers=PARAMETERS)
     print(response.json())
 
 
-def all_files(att, limit, output):
+def all_files(att, limit, _output):
+    """
+    Makes the file API call and writes output to files
+    :param att: list of attributes to be shown
+    :param limit: how many files to be listed
+    :param _output: location of output files
+    """
     data = None
     if att == '' and limit == '':
         print(URL + '/api/v1/files')
@@ -43,7 +57,7 @@ def all_files(att, limit, output):
         response = requests.get(URL + '/api/v1/files?limit=' + limit + '&attributes=' + att,
                                 headers=PARAMETERS)
         data = response.json()['data']
-        attributes_file(data, output)
+        attributes_file(data, _output)
     elif att == '':
         print(URL + '/api/v1/files?limit=' + limit)
         response = requests.get(URL + '/api/v1/files?limit=' + limit, headers=PARAMETERS)
@@ -52,9 +66,9 @@ def all_files(att, limit, output):
         print(URL + '/api/v1/files?attributes=' + att)
         response = requests.get(URL + '/api/v1/files?attributes=' + att, headers=PARAMETERS)
         data = response.json()['data']
-        attributes_file(data, output)
+        attributes_file(data, _output)
 
-    data_file = open(output + 'files.csv', 'w')
+    data_file = open(_output + 'files.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     headers.remove('attributes')
@@ -64,12 +78,17 @@ def all_files(att, limit, output):
         csv_writer.writerow(x.values())
 
 
-def file_by_id(id_, output):
+def file_by_id(id_, _output):
+    """
+    Makes file API call for a specific file and writes information to files
+    :param id_: File ID
+    :param _output: Output directory
+    """
     print(URL + '/api/v1/files/' + id_)
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open(output + 'attributes.csv', 'w')
+    att_file = open(_output + 'attributes.csv', 'w')
     csv_writer = csv.writer(att_file)
     headers = list(data['attributes'][0].keys())
     csv_writer.writerow(headers)
@@ -77,18 +96,22 @@ def file_by_id(id_, output):
         csv_writer.writerow(x.values())
 
     del data['attributes']
-    data_file = open(output + 'file_' + id_ + '.csv', 'w')
+    data_file = open(_output + 'file_' + id_ + '.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
     csv_writer.writerow(data.values())
 
 
-def devices(output):
+def devices(_output):
+    """
+    Lists output of Device API call to file
+    :param _output: output file location
+    """
     print(URL + '/api/v1/devices/')
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
     data = response.json()['data']
-    data_file = open(output + 'devices.csv', 'w')
+    data_file = open(_output + 'devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     csv_writer.writerow(headers)
@@ -96,11 +119,16 @@ def devices(output):
         csv_writer.writerow(x.values())
 
 
-def device_by_id(id_, output):
+def device_by_id(id_, _output):
+    """
+    Writes information for specific device
+    :param id_: ID of specific device
+    :param _output: output location for information
+    """
     print(URL + '/api/v1/devices/' + id_)
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
     data = response.json()
-    data_file = open(output + 'devices.csv', 'w')
+    data_file = open(_output + 'devices.csv', 'w')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -108,6 +136,13 @@ def device_by_id(id_, output):
 
 
 def post_attribute(id_, name, type_, value):
+    """
+    Makes Attribute API call and prints response to terminal
+    :param id_: file ID
+    :param name: attribute name
+    :param type_: attribute type
+    :param value: attribute value
+    """
     print(URL + '/api/v1/attributes')
     attributes = {"name": name,
                   "type": type_,
@@ -135,6 +170,7 @@ if __name__ == '__main__':
 
     print('API Starting')
 
+    # Specifies output directory if one is passed in
     output = './output/'
     if args.output != '':
         if not os.path.exists(args.output):
@@ -143,9 +179,11 @@ if __name__ == '__main__':
     elif not os.path.exists('./output/'):
         os.makedirs('./output/')
 
+    # changes API url if one is passed in. (ONLY FOR DEVS)
     if args.url != '':
         URL = args.url
 
+    # changes API key if one is passed in
     if args.key != '':
         PARAMETERS.update({"x-api-key": args.key})
     elif args.key == '' and os.environ.get('API_KEY') is None:
