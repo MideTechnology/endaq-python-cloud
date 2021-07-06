@@ -17,6 +17,8 @@ like you can pass in your API Key through the command line using ``-k`` but that
 secure than using a ``.env``. Output of all commands except ``account`` and `attributes` are
 in ``csv`` files in the ``output`` folder
 
+Runs on Python 3.6 and higher
+
 Usages:
 ++++++
 -h                  Command Line Help
@@ -28,9 +30,9 @@ Usages:
 --type, -t          Attribute Type; options = int, float, string, boolean
 --value, -v         Attribute Value
 
-- python API_wrapper.py files -a -l
+- python API_wrapper.py files -a <ATTRIBUTES_TO_GET> -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
 - python API_wrapper.py file-id -i **# additional argument needed**
-- python API_wrapper.py devices -l
+- python API_wrapper.py devices -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
 - python API_wrapper.py device-id -i **# additional argument needed**
 - python API_wrapper.py account
-- python API_wrapper.py attribute -n -t -v -i **# additional arguments needed**
+- python API_wrapper.py attribute -n <ATTRIBUTE_NAME> -t <ATTRIBUTE_TYPE> -v <ATTRIBUTE_VALUE> -i **# additional arguments needed**

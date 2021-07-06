@@ -20,7 +20,7 @@ def attributes_file(data, _output):
     :param data: All the attributes for the files
     :param _output: File path
     """
-    att_file = open(_output + 'attributes.csv', 'w')
+    att_file = open(_output + 'attributes.csv', 'w', newline='')
     csv_writer = csv.writer(att_file)
     csv_writer.writerow(['file_id', 'attribute'])
     for x in data:
@@ -64,7 +64,7 @@ def all_files(att, limit, _output):
         data = response.json()['data']
         attributes_file(data, _output)
 
-    data_file = open(_output + 'files.csv', 'w')
+    data_file = open(_output + 'files.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     headers.remove('attributes')
@@ -84,7 +84,7 @@ def file_by_id(id_, _output):
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open(_output + 'attributes.csv', 'w')
+    att_file = open(_output + 'attributes.csv', 'w', newline='')
     csv_writer = csv.writer(att_file)
     headers = list(data['attributes'][0].keys())
     csv_writer.writerow(headers)
@@ -92,7 +92,7 @@ def file_by_id(id_, _output):
         csv_writer.writerow(x.values())
 
     del data['attributes']
-    data_file = open(_output + 'file_' + id_ + '.csv', 'w')
+    data_file = open(_output + 'file_' + id_ + '.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -107,7 +107,7 @@ def devices(_output):
     print(URL + '/api/v1/devices/')
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
     data = response.json()['data']
-    data_file = open(_output + 'devices.csv', 'w')
+    data_file = open(_output + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     csv_writer.writerow(headers)
@@ -124,7 +124,7 @@ def device_by_id(id_, _output):
     print(URL + '/api/v1/devices/' + id_)
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
     data = response.json()
-    data_file = open(_output + 'devices.csv', 'w')
+    data_file = open(_output + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
