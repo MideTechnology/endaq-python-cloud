@@ -148,7 +148,7 @@ def post_attribute(id_, name, type_, value):
     print(att.json())
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('command', choices=['files', 'file-id', 'devices', 'device-id', 'account', 'attribute'])
     parser.add_argument('--id', '-i', default='', help='Device or File id')
@@ -206,3 +206,7 @@ if __name__ == '__main__':
             sys.exit('id, name, type, and value can\'t be empty')
     else:
         sys.exit('Use -h for help with commands.')
+
+
+if __name__ == '__main__':
+    main()

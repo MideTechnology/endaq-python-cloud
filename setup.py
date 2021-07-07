@@ -42,4 +42,9 @@ setuptools.setup(
             'test': INSTALL_REQUIRES + TEST_REQUIRES,
             'example': INSTALL_REQUIRES + EXAMPLE_REQUIRES,
             },
+        entry_points=dict(
+            console_scripts=[
+                "endaq-cloud=endaq.cloud.API_wrapper:main",
+            ],
+        ),
 )
