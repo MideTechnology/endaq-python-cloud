@@ -1,5 +1,6 @@
 import argparse
 import sys
+import urllib.parse
 
 import requests
 import os
@@ -44,25 +45,12 @@ def all_files(att, limit, _output):
     :param limit: how many files to be listed
     :param _output: location of output files
     """
-    if att == '' and limit == '':
-        print(URL + '/api/v1/files')
-        response = requests.get(URL + '/api/v1/files', headers=PARAMETERS)
-        data = response.json()['data']
-    elif att != '' and limit != '':
-        print(URL + '/api/v1/files?limit=' + limit + '&attributes=' + att)
-        response = requests.get(URL + '/api/v1/files?limit=' + limit + '&attributes=' + att,
-                                headers=PARAMETERS)
-        data = response.json()['data']
-        attributes_file(data, _output)
-    elif att == '':
-        print(URL + '/api/v1/files?limit=' + limit)
-        response = requests.get(URL + '/api/v1/files?limit=' + limit, headers=PARAMETERS)
-        data = response.json()['data']
-    else:
-        print(URL + '/api/v1/files?attributes=' + att)
-        response = requests.get(URL + '/api/v1/files?attributes=' + att, headers=PARAMETERS)
-        data = response.json()['data']
-        attributes_file(data, _output)
+    query_data = {k: v for k, v in dict(limit=limit, attributes=att).items() if v}
+    query = ('?' + urllib.parse.urlencode(query_data)) if query_data else ''
+
+    print(URL + '/api/v1/files' + query)
+    response = requests.get(URL + '/api/v1/files' + query, headers=PARAMETERS)
+    data = response.json()['data']
 
     data_file = open(_output + 'files.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
@@ -171,12 +159,8 @@ def main():
     print('API Starting')
 
     # Specifies output directory if one is passed in
-    output = './output/'
-    if args.output != '':
-        if not os.path.exists(args.output):
-            os.makedirs(args.output)
-        output = args.output
-    elif not os.path.exists('./output/'):
+    output = args.output or './output/'
+    if not os.path.exists('./output/'):
         os.makedirs('./output/')
 
     # changes API url if one is passed in. (ONLY FOR DEVS)
@@ -187,7 +171,7 @@ def main():
     # changes API key if one is passed in
     if args.key != '':
         PARAMETERS.update({"x-api-key": args.key})
-    elif args.key == '' and os.environ.get('API_KEY') is None:
+    elif os.environ.get('API_KEY') is None:
         sys.exit('Create a .env with API Key or pass it in with --key')
 
     if args.command == 'account':
