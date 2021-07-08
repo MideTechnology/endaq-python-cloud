@@ -180,6 +180,7 @@ def main():
         os.makedirs('./output/')
 
     # changes API url if one is passed in. (ONLY FOR DEVS)
+    global URL
     if args.url != '':
         URL = args.url
 
