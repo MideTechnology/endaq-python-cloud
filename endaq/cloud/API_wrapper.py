@@ -32,7 +32,7 @@ def attributes_file(data, _output):
 
 def account_info():
     """Request account info from the cloud and print the results."""
-    print(URL + '/api/v1/account/info')
+    print('GET', URL + '/api/v1/account/info')
     response = requests.get(URL + '/api/v1/account/info', headers=PARAMETERS)
     print(response.json())
 
@@ -48,7 +48,7 @@ def all_files(att, limit, _output):
     query_data = {k: v for k, v in dict(limit=limit, attributes=att).items() if v}
     query = ('?' + urllib.parse.urlencode(query_data)) if query_data else ''
 
-    print(URL + '/api/v1/files' + query)
+    print('GET', URL + '/api/v1/files' + query)
     response = requests.get(URL + '/api/v1/files' + query, headers=PARAMETERS)
     data = response.json()['data']
 
@@ -69,7 +69,7 @@ def file_by_id(id_, _output):
     :param id_: File ID
     :param _output: Output directory
     """
-    print(URL + '/api/v1/files/' + id_)
+    print('GET', URL + '/api/v1/files/' + id_)
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
@@ -94,8 +94,9 @@ def devices(_output):
 
     :param _output: output file location
     """
-    print(URL + '/api/v1/devices/')
+    print('GET', URL + '/api/v1/devices/')
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
+
     data = response.json()['data']
     data_file = open(_output + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
@@ -112,8 +113,9 @@ def device_by_id(id_, _output):
     :param id_: ID of specific device
     :param _output: output location for information
     """
-    print(URL + '/api/v1/devices/' + id_)
+    print('GET', URL + '/api/v1/devices/' + id_)
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
+
     data = response.json()
     data_file = open(_output + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
@@ -131,7 +133,7 @@ def post_attribute(id_, name, type_, value):
     :param type_: attribute type
     :param value: attribute value
     """
-    print(URL + '/api/v1/attributes')
+    print('POST', URL + '/api/v1/attributes')
     attributes = {"name": name,
                   "type": type_,
                   "value": value,
