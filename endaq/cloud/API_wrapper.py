@@ -16,7 +16,8 @@ PARAMETERS = {
 
 def attributes_file(data, _output):
     """
-    Writes the attributes to a file for user to see
+    Write the given attributes to a file.
+
     :param data: All the attributes for the files
     :param _output: File path
     """
@@ -29,9 +30,7 @@ def attributes_file(data, _output):
 
 
 def account_info():
-    """
-    Makes the account API call and prints info to terminal
-    """
+    """Request account info from the cloud and print the results."""
     print(URL + '/api/v1/account/info')
     response = requests.get(URL + '/api/v1/account/info', headers=PARAMETERS)
     print(response.json())
@@ -39,7 +38,8 @@ def account_info():
 
 def all_files(att, limit, _output):
     """
-    Makes the file API call and writes output to files
+    Request file data from the cloud and write the output to a file.
+
     :param att: list of attributes to be shown
     :param limit: how many files to be listed
     :param _output: location of output files
@@ -76,7 +76,8 @@ def all_files(att, limit, _output):
 
 def file_by_id(id_, _output):
     """
-    Makes file API call for a specific file and writes information to files
+    Request a specific file's data from the cloud and write the output to files.
+
     :param id_: File ID
     :param _output: Output directory
     """
@@ -101,7 +102,8 @@ def file_by_id(id_, _output):
 
 def devices(_output):
     """
-    Lists output of Device API call to file
+    Request devices' data from the cloud and write the output to a file.
+
     :param _output: output file location
     """
     print(URL + '/api/v1/devices/')
@@ -117,7 +119,8 @@ def devices(_output):
 
 def device_by_id(id_, _output):
     """
-    Writes information for specific device
+    Request a specific device's data from the cloud and write the output to a file.
+    
     :param id_: ID of specific device
     :param _output: output location for information
     """
@@ -133,7 +136,8 @@ def device_by_id(id_, _output):
 
 def post_attribute(id_, name, type_, value):
     """
-    Makes Attribute API call and prints response to terminal
+    Post attribute data to the cloud and print the results.
+
     :param id_: file ID
     :param name: attribute name
     :param type_: attribute type
