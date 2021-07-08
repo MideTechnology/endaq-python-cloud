@@ -15,14 +15,14 @@ PARAMETERS = {
     }
 
 
-def attributes_file(data, _output):
+def attributes_file(data, output_path):
     """
     Write the given attributes to a file.
 
     :param data: All the attributes for the files
-    :param _output: File path
+    :param output_path: File path
     """
-    att_file = open(_output + 'attributes.csv', 'w', newline='')
+    att_file = open(output_path + 'attributes.csv', 'w', newline='')
     csv_writer = csv.writer(att_file)
     csv_writer.writerow(['file_id', 'attribute'])
     for x in data:
@@ -37,13 +37,13 @@ def account_info():
     print(response.json())
 
 
-def all_files(att, limit, _output):
+def all_files(att, limit, output_path):
     """
     Request file data from the cloud and write the output to a file.
 
     :param att: list of attributes to be shown
     :param limit: how many files to be listed
-    :param _output: location of output files
+    :param output_path: location of output files
     """
     query_data = {k: v for k, v in dict(limit=limit, attributes=att).items() if v}
     query = ('?' + urllib.parse.urlencode(query_data)) if query_data else ''
@@ -52,7 +52,7 @@ def all_files(att, limit, _output):
     response = requests.get(URL + '/api/v1/files' + query, headers=PARAMETERS)
     data = response.json()['data']
 
-    data_file = open(_output + 'files.csv', 'w', newline='')
+    data_file = open(output_path + 'files.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     headers.remove('attributes')
@@ -62,18 +62,18 @@ def all_files(att, limit, _output):
         csv_writer.writerow(x.values())
 
 
-def file_by_id(id_, _output):
+def file_by_id(id_, output_path):
     """
     Request a specific file's data from the cloud and write the output to files.
 
     :param id_: File ID
-    :param _output: Output directory
+    :param output_path: Output directory
     """
     print('GET', URL + '/api/v1/files/' + id_)
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open(_output + 'attributes.csv', 'w', newline='')
+    att_file = open(output_path + 'attributes.csv', 'w', newline='')
     csv_writer = csv.writer(att_file)
     headers = list(data['attributes'][0].keys())
     csv_writer.writerow(headers)
@@ -81,24 +81,24 @@ def file_by_id(id_, _output):
         csv_writer.writerow(x.values())
 
     del data['attributes']
-    data_file = open(_output + 'file_' + id_ + '.csv', 'w', newline='')
+    data_file = open(output_path + 'file_' + id_ + '.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
     csv_writer.writerow(data.values())
 
 
-def devices(_output):
+def devices(output_path):
     """
     Request devices' data from the cloud and write the output to a file.
 
-    :param _output: output file location
+    :param output_path: output file location
     """
     print('GET', URL + '/api/v1/devices/')
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
 
     data = response.json()['data']
-    data_file = open(_output + 'devices.csv', 'w', newline='')
+    data_file = open(output_path + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = list(data[0].keys())
     csv_writer.writerow(headers)
@@ -106,18 +106,18 @@ def devices(_output):
         csv_writer.writerow(x.values())
 
 
-def device_by_id(id_, _output):
+def device_by_id(id_, output_path):
     """
     Request a specific device's data from the cloud and write the output to a file.
     
     :param id_: ID of specific device
-    :param _output: output location for information
+    :param output_path: output location for information
     """
     print('GET', URL + '/api/v1/devices/' + id_)
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
 
     data = response.json()
-    data_file = open(_output + 'devices.csv', 'w', newline='')
+    data_file = open(output_path + 'devices.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
