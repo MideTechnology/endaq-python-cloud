@@ -37,9 +37,9 @@ Usages:
 --type, -t          Attribute Type; options = int, float, string, boolean
 --value, -v         Attribute Value
 
-- python API_wrapper.py files -a <ATTRIBUTES_TO_GET> -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
-- python API_wrapper.py file-id -i **# additional argument needed**
-- python API_wrapper.py devices -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
-- python API_wrapper.py device-id -i **# additional argument needed**
-- python API_wrapper.py account
-- python API_wrapper.py attribute -n <ATTRIBUTE_NAME> -t <ATTRIBUTE_TYPE> -v <ATTRIBUTE_VALUE> -i **# additional arguments needed**
+- endaq-cloud files -a <ATTRIBUTES_TO_GET> -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
+- endaq-cloud file-id -i **# additional argument needed**
+- endaq-cloud devices -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
+- endaq-cloud device-id -i **# additional argument needed**
+- endaq-cloud account
+- endaq-cloud attribute -n <ATTRIBUTE_NAME> -t <ATTRIBUTE_TYPE> -v <ATTRIBUTE_VALUE> -i **# additional arguments needed**
