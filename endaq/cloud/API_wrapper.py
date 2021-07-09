@@ -158,8 +158,6 @@ def main():
     parser.add_argument('--output', '-o', default='')
     args = parser.parse_args()
 
-    print('API Starting')
-
     # Specifies output directory if one is passed in
     output = args.output or './output/'
     if not os.path.exists('./output/'):
