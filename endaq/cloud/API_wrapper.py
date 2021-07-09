@@ -22,12 +22,12 @@ def attributes_file(data, output_path):
     :param data: All the attributes for the files
     :param output_path: File path
     """
-    att_file = open(output_path + 'attributes.csv', 'w', newline='')
-    csv_writer = csv.writer(att_file)
-    csv_writer.writerow(['file_id', 'attribute'])
-    for x in data:
-        for y in x['attributes']:
-            csv_writer.writerow([x['id'], y])
+    with open(output_path + 'attributes.csv', 'w', newline='') as att_file:
+        csv_writer = csv.writer(att_file)
+        csv_writer.writerow(['file_id', 'attribute'])
+        for x in data:
+            for y in x['attributes']:
+                csv_writer.writerow([x['id'], y])
 
 
 def account_info():
@@ -54,14 +54,14 @@ def all_files(att, limit, output_path):
     if att:
         attributes_file(data, output_path)
 
-    data_file = open(output_path + 'files.csv', 'w', newline='')
-    csv_writer = csv.writer(data_file)
-    headers = list(data[0].keys())
-    headers.remove('attributes')
-    csv_writer.writerow(headers)
-    for x in data:
-        del x['attributes']
-        csv_writer.writerow(x.values())
+    with open(output_path + 'files.csv', 'w', newline='') as data_file:
+        csv_writer = csv.writer(data_file)
+        headers = list(data[0].keys())
+        headers.remove('attributes')
+        csv_writer.writerow(headers)
+        for x in data:
+            del x['attributes']
+            csv_writer.writerow(x.values())
 
 
 def file_by_id(id_, output_path):
@@ -75,19 +75,19 @@ def file_by_id(id_, output_path):
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
 
-    att_file = open(output_path + 'attributes.csv', 'w', newline='')
-    csv_writer = csv.writer(att_file)
-    headers = list(data['attributes'][0].keys())
-    csv_writer.writerow(headers)
-    for x in data['attributes']:
-        csv_writer.writerow(x.values())
+    with open(output_path + 'attributes.csv', 'w', newline='') as att_file:
+        csv_writer = csv.writer(att_file)
+        headers = list(data['attributes'][0].keys())
+        csv_writer.writerow(headers)
+        for x in data['attributes']:
+            csv_writer.writerow(x.values())
 
     del data['attributes']
-    data_file = open(output_path + 'file_' + id_ + '.csv', 'w', newline='')
-    csv_writer = csv.writer(data_file)
-    headers = data.keys()
-    csv_writer.writerow(headers)
-    csv_writer.writerow(data.values())
+    with open(output_path + 'file_' + id_ + '.csv', 'w', newline='') as data_file:
+        csv_writer = csv.writer(data_file)
+        headers = data.keys()
+        csv_writer.writerow(headers)
+        csv_writer.writerow(data.values())
 
 
 def devices(output_path):
@@ -100,12 +100,12 @@ def devices(output_path):
     response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
 
     data = response.json()['data']
-    data_file = open(output_path + 'devices.csv', 'w', newline='')
-    csv_writer = csv.writer(data_file)
-    headers = list(data[0].keys())
-    csv_writer.writerow(headers)
-    for x in data:
-        csv_writer.writerow(x.values())
+    with open(output_path + 'devices.csv', 'w', newline='') as data_file:
+        csv_writer = csv.writer(data_file)
+        headers = list(data[0].keys())
+        csv_writer.writerow(headers)
+        for x in data:
+            csv_writer.writerow(x.values())
 
 
 def device_by_id(id_, output_path):
@@ -119,11 +119,11 @@ def device_by_id(id_, output_path):
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
 
     data = response.json()
-    data_file = open(output_path + 'devices.csv', 'w', newline='')
-    csv_writer = csv.writer(data_file)
-    headers = data.keys()
-    csv_writer.writerow(headers)
-    csv_writer.writerow(data.values())
+    with open(output_path + 'devices.csv', 'w', newline='') as data_file:
+        csv_writer = csv.writer(data_file)
+        headers = data.keys()
+        csv_writer.writerow(headers)
+        csv_writer.writerow(data.values())
 
 
 def post_attribute(id_, name, type_, value):
