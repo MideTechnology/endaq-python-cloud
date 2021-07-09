@@ -51,6 +51,8 @@ def all_files(att, limit, output_path):
     print('GET', URL + '/api/v1/files' + query)
     response = requests.get(URL + '/api/v1/files' + query, headers=PARAMETERS)
     data = response.json()['data']
+    if att:
+        attributes_file(data, output_path)
 
     data_file = open(output_path + 'files.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
