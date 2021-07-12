@@ -90,14 +90,18 @@ def file_by_id(id_, output_path):
     csv_writer.writerow(data.values())
 
 
-def devices(output_path):
+def devices(output_path, limit):
     """
     Request devices' data from the cloud and write the output to a file.
 
     :param output_path: output file location
+    :param limit: number of devices shown
     """
     print('GET', URL + '/api/v1/devices/')
-    response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
+    if limit == '':
+        response = requests.get(URL + '/api/v1/devices/', headers=PARAMETERS)
+    else:
+        response = requests.get(URL + '/api/v1/devices?limit=' + limit, headers=PARAMETERS)
 
     data = response.json()['data']
     data_file = open(output_path + 'devices.csv', 'w', newline='')
@@ -119,7 +123,7 @@ def device_by_id(id_, output_path):
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
 
     data = response.json()
-    data_file = open(output_path + 'devices.csv', 'w', newline='')
+    data_file = open(output_path + 'device' + id_ + '.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -150,7 +154,7 @@ def main():
     parser.add_argument('--id', '-i', default='', help='Device or File id')
     parser.add_argument('--attributes', '-a', default='', help='What attributes you want to view; default is none, '
                                                                'can be all, or att1,att2,...')
-    parser.add_argument('--limit', '-l', default='', help='How many values you want returned; Max 100')
+    parser.add_argument('--limit', '-l', default='', help='How many devices or files you want returned; Max 100')
     parser.add_argument('--key', '-k', default='', help='API key if it is not in the .env file')
     parser.add_argument('--name', '-n', help='Name of new attribute')
     parser.add_argument('--type', '-t', help='Type of element the new attribute is')
@@ -185,7 +189,7 @@ def main():
         file_by_id(args.id, output)
         print(f'output can be found in output/file_{args.id}.csv and output/attributes.csv')
     elif args.command == 'devices':
-        devices(output)
+        devices(output, args.limit)
         print('output can be found in devices.csv')
     elif args.command == 'device-id' and args.id != '':
         device_by_id(args.id, output)
