@@ -178,8 +178,8 @@ def main():
 
     # Specifies output directory if one is passed in
     output = args.output or './output/'
-    if not os.path.exists('./output/'):
-        os.makedirs('./output/')
+    if not os.path.exists(output):
+        os.makedirs(output)
 
     # changes API url if one is passed in. (ONLY FOR DEVS)
     global URL
