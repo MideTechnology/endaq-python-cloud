@@ -221,7 +221,7 @@ def main():
         print('output can be found in devices.csv')
     elif args.command == 'device-id' and args.id != '':
         device_by_id(args.id, output, args.verbose)
-        print('output can be found in devices.csv')
+        print(f'output can be found in device_{args.id}.csv')
     elif args.command == 'attribute':
         if args.name is not None and args.type is not None and args.value is not None and args.id is not None:
             post_attribute(args.id, args.name, args.type, args.value, args.verbose)
