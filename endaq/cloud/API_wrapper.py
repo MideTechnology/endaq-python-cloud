@@ -79,7 +79,7 @@ def file_by_id(id_, output_path, verbose):
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
     if data['code']:
-        raise Exception('Invalid File ID')
+        raise ValueError(f'invalid file ID "{id_}"')
 
     with open(output_path + 'attributes.csv', 'w', newline='') as att_file:
         csv_writer = csv.writer(att_file)
@@ -132,7 +132,7 @@ def device_by_id(id_, output_path, verbose):
 
     data = response.json()
     if data['code']:
-        raise Exception('Invalid Device ID')
+        raise ValueError(f'invalid device ID "{id_}"')
     data_file = open(output_path + 'device_' + id_ + '.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
