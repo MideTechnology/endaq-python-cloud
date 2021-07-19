@@ -26,6 +26,17 @@ To access the cloud, this tool requires an API key associated with a user's enDA
 
 Runs on Python 3.6 and higher
 
+Commands:
+++++++
+
+- files               Outputs file information for selected number of files and attributes
+- file-id             Outputs file information for file with specified ID to output file
+- devices             Ouputs device information for selected number of files
+- device-id           Output device information for device with specified ID to output file
+- account             Prints out account information
+- attributes          Adds an attribute to a specified file
+- set-env             Creates a .env file with passed in API key *NOT SECURE*
+
 Usages:
 ++++++
 -h                  Command Line Help
@@ -36,6 +47,7 @@ Usages:
 --name, -n          Attribute Name
 --type, -t          Attribute Type; options = int, float, string, boolean
 --value, -v         Attribute Value
+--verbose, -V       Prints out URL API calls
 
 - endaq-cloud files -a <ATTRIBUTES_TO_GET> -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
 - endaq-cloud file-id -i **# additional argument needed**

@@ -1,5 +1,6 @@
 import argparse
 import sys
+import textwrap
 import urllib.parse
 
 import requests
@@ -77,6 +78,8 @@ def file_by_id(id_, output_path, verbose):
         print('GET', URL + '/api/v1/files/' + id_)
     response = requests.get(URL + '/api/v1/files/' + id_, headers=PARAMETERS)
     data = response.json()
+    if data['code']:
+        raise Exception('Invalid File ID')
 
     with open(output_path + 'attributes.csv', 'w', newline='') as att_file:
         csv_writer = csv.writer(att_file)
@@ -128,7 +131,9 @@ def device_by_id(id_, output_path, verbose):
     response = requests.get(URL + '/api/v1/devices/' + id_, headers=PARAMETERS)
 
     data = response.json()
-    data_file = open(output_path + 'device' + id_ + '.csv', 'w', newline='')
+    if data['code']:
+        raise Exception('Invalid Device ID')
+    data_file = open(output_path + 'device_' + id_ + '.csv', 'w', newline='')
     csv_writer = csv.writer(data_file)
     headers = data.keys()
     csv_writer.writerow(headers)
@@ -160,8 +165,19 @@ def make_env(key):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('command', choices=['files', 'file-id', 'devices', 'device-id', 'account', 'attribute', 'set-env'])
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=textwrap.dedent('''\
+    Commands:
+        - files               Outputs file information for selected number of files and attributes
+        - file-id             Outputs file information for file with specified ID to output file
+        - devices             Ouputs device information for selected number of files
+        - device-id           Output device information for device with specified ID to output file
+        - account             Prints out account information
+        - attributes          Adds an attribute to a specified file
+        - set-env             Creates a .env file with passed in API key *NOT SECURE*
+    '''))
+    parser.add_argument('command', choices=['files', 'file-id', 'devices', 'device-id', 'account', 'attribute',
+                                            'set-env'])
     parser.add_argument('--id', '-i', default='', help='Device or File id')
     parser.add_argument('--attributes', '-a', default='', help='What attributes you want to view; default is none, '
                                                                'can be all, or att1,att2,...')
