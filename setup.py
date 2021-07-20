@@ -4,6 +4,8 @@ with open('README.rst', 'r', encoding='utf-8') as fh:
     long_description = fh.read()
 
 INSTALL_REQUIRES = [
+    "requests",
+    "python-dotenv",
     ]
 
 TEST_REQUIRES = [
@@ -40,4 +42,9 @@ setuptools.setup(
             'test': INSTALL_REQUIRES + TEST_REQUIRES,
             'example': INSTALL_REQUIRES + EXAMPLE_REQUIRES,
             },
+        entry_points=dict(
+            console_scripts=[
+                "endaq-cloud=endaq.cloud.API_wrapper:main",
+            ],
+        ),
 )
