@@ -72,22 +72,14 @@ def all_files(att, limit, output_path, verbose):
 def download_file(id_, output_path=None):
     """Download the file with the given ID."""
     request_url = f"{URL}/api/v1/files/download/{id_}"
-    download_url = requests.get(request_url, headers=PARAMETERS).json()['url']
+    response = requests.get(request_url, headers=PARAMETERS).json()
+    download_url = response["url"]
+    download_filename = response["file_name"]
     download_response = requests.get(download_url)
 
     # Generate a default filename for downloads, if not explicitly provided
     if output_path is None:
-        output_path = pathlib.Path(f"download-{id_}.ide")
-
-        if not os.path.isfile(output_path):
-            # If there's a filename collision, generate a unique filename
-            template = f"download-{id_} ({{}}).ide"
-            for i in range(1, 2**16 + 1):
-                output_path = pathlib.Path(template.format(i))
-                if os.path.isfile(output_path):
-                    break
-            else:
-                raise RuntimeError("error generating unique filename")
+        output_path = pathlib.Path(download_filename)
 
     with open(output_path, "wb") as file:
         file.write(download_response.content)
