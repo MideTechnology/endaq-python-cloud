@@ -1,4 +1,6 @@
 import argparse
+import itertools
+import pathlib
 import sys
 import textwrap
 import urllib.parse
@@ -65,6 +67,30 @@ def all_files(att, limit, output_path, verbose):
         for x in data:
             del x['attributes']
             csv_writer.writerow(x.values())
+
+
+def download_file(id_, output_path=None):
+    """Download the file with the given ID."""
+    request_url = f"{URL}/api/v1/files/download/{id_}"
+    download_url = requests.get(request_url, headers=PARAMETERS).json()['url']
+    download_response = requests.get(download_url)
+
+    # Generate a default filename for downloads, if not explicitly provided
+    if output_path is None:
+        output_path = pathlib.Path(f"download-{id_}.ide")
+
+        if not os.path.isfile(output_path):
+            # If there's a filename collision, generate a unique filename
+            template = f"download-{id_} ({{}}).ide"
+            for i in range(1, 2**16 + 1):
+                output_path = pathlib.Path(template.format(i))
+                if os.path.isfile(output_path):
+                    break
+            else:
+                raise RuntimeError("error generating unique filename")
+
+    with open(output_path, "wb") as file:
+        file.write(download_response.content)
 
 
 def file_by_id(id_, output_path, verbose):
@@ -210,6 +236,8 @@ def main():
 
     if args.command == 'account':
         account_info(args.verbose)
+    elif args.command == 'download':
+        download_file(args.id, output)
     elif args.command == 'files':
         all_files(args.attributes, args.limit, output, args.verbose)
         print('output can be found in output/files.csv and output/attributes.csv')
