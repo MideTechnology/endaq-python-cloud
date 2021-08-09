@@ -1,5 +1,4 @@
 import argparse
-import itertools
 import pathlib
 import sys
 import textwrap
@@ -78,10 +77,10 @@ def download_file(id_, output_path=None):
     download_response = requests.get(download_url)
 
     # Generate a default filename for downloads, if not explicitly provided
-    if output_path is None:
-        output_path = pathlib.Path(download_filename)
+    output_path = pathlib.Path(output_path or ".")
+    file_path = output_path / download_filename
 
-    with open(output_path, "wb") as file:
+    with open(file_path, "wb") as file:
         file.write(download_response.content)
 
 
@@ -194,7 +193,7 @@ def main():
         - attributes          Adds an attribute to a specified file
         - set-env             Creates a .env file with passed in API key *NOT SECURE*
     '''))
-    parser.add_argument('command', choices=['files', 'file-id', 'devices', 'device-id', 'account', 'attribute',
+    parser.add_argument('command', choices=['files', 'download', 'file-id', 'devices', 'device-id', 'account', 'attribute',
                                             'set-env'])
     parser.add_argument('--id', '-i', default='', help='Device or File id')
     parser.add_argument('--attributes', '-a', default='', help='What attributes you want to view; default is none, '
