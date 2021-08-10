@@ -76,7 +76,10 @@ def download_file(file_id, output_path=None):
         download_url = response["url"]
         download_filename = response["file_name"]
     except KeyError:
-        raise RuntimeError(response.get("message", "failed to request download link"))
+        raise RuntimeError(
+            "failed to request download link"
+            + (f": {response['message']}" if "message" in response else "")
+        )
     download_response = requests.get(download_url)
 
     # Generate a default filename for downloads, if not explicitly provided
