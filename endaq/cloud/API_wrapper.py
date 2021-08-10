@@ -68,9 +68,9 @@ def all_files(att, limit, output_path, verbose):
             csv_writer.writerow(x.values())
 
 
-def download_file(id_, output_path=None):
+def download_file(file_id, output_path=None):
     """Download the file with the given ID."""
-    request_url = f"{URL}/api/v1/files/download/{id_}"
+    request_url = f"{URL}/api/v1/files/download/{file_id}"
     response = requests.get(request_url, headers=PARAMETERS).json()
     download_url = response["url"]
     download_filename = response["file_name"]
