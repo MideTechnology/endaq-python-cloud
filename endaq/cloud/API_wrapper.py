@@ -70,20 +70,21 @@ def all_files(att, limit, output_path, verbose):
 
 def download_file(file_id, output_path=None):
     """Download the file with the given ID."""
+    # Request a download link for the file
     request_url = f"{URL}/api/v1/files/download/{file_id}"
     response = requests.get(request_url, headers=PARAMETERS)
     response.raise_for_status()
 
+    # Request the contents of the file
     response_json = response.json()
     download_url = response_json["url"]
     download_filename = response_json["file_name"]
     download_response = requests.get(download_url, stream=True)
     download_response.raise_for_status()
 
-    # Generate a default filename for downloads, if not explicitly provided
+    # Save the contents of the file to disk
     output_path = pathlib.Path(output_path or ".")
     file_path = output_path / download_filename
-
     with open(file_path, "wb") as file:
         for chunk in download_response.iter_content(chunk_size=None):
             file.write(chunk)
