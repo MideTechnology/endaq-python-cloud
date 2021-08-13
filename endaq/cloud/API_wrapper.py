@@ -77,7 +77,7 @@ def download_file(file_id, output_path=None):
     response_json = response.json()
     download_url = response_json["url"]
     download_filename = response_json["file_name"]
-    download_response = requests.get(download_url)
+    download_response = requests.get(download_url, stream=True)
     download_response.raise_for_status()
 
     # Generate a default filename for downloads, if not explicitly provided
@@ -85,7 +85,8 @@ def download_file(file_id, output_path=None):
     file_path = output_path / download_filename
 
     with open(file_path, "wb") as file:
-        file.write(download_response.content)
+        for chunk in download_response.iter_content(chunk_size=None):
+            file.write(chunk)
 
 
 def file_by_id(id_, output_path, verbose):
