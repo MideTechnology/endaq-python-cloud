@@ -71,16 +71,14 @@ def all_files(att, limit, output_path, verbose):
 def download_file(file_id, output_path=None):
     """Download the file with the given ID."""
     request_url = f"{URL}/api/v1/files/download/{file_id}"
-    response = requests.get(request_url, headers=PARAMETERS).json()
-    try:
-        download_url = response["url"]
-        download_filename = response["file_name"]
-    except KeyError:
-        raise RuntimeError(
-            "failed to request download link"
-            + (f": {response['message']}" if "message" in response else "")
-        )
+    response = requests.get(request_url, headers=PARAMETERS)
+    response.raise_for_status()
+
+    response_json = response.json()
+    download_url = response_json["url"]
+    download_filename = response_json["file_name"]
     download_response = requests.get(download_url)
+    download_response.raise_for_status()
 
     # Generate a default filename for downloads, if not explicitly provided
     output_path = pathlib.Path(output_path or ".")
