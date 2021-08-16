@@ -22,7 +22,7 @@ def convert_file_data_to_dataframe(files_data):
     TODO:
      - Check that this doesn't produce problems when multiple files have the same name (I'm now thinking it will)
     """
-    if len(files_data):
+    if len(files_data) == 0:
         return pd.DataFrame()
     else:
         df = pd.DataFrame(files_data)
