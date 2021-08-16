@@ -73,14 +73,20 @@ def download_file(file_id, output_path=None):
     # Request a download link for the file
     request_url = f"{URL}/api/v1/files/download/{file_id}"
     response = requests.get(request_url, headers=PARAMETERS)
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as ex:
+        raise RuntimeError("failed to retrieve file download link")
 
     # Request the contents of the file
     response_json = response.json()
     download_url = response_json["url"]
     download_filename = response_json["file_name"]
     download_response = requests.get(download_url, stream=True)
-    download_response.raise_for_status()
+    try:
+        download_response.raise_for_status()
+    except requests.HTTPError as ex:
+        raise RuntimeError("failed to download file")
 
     # Save the contents of the file to disk
     output_path = pathlib.Path(output_path or ".")
