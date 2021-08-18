@@ -1,4 +1,5 @@
 import argparse
+import pathlib
 import sys
 import textwrap
 import urllib.parse
@@ -65,6 +66,34 @@ def all_files(att, limit, output_path, verbose):
         for x in data:
             del x['attributes']
             csv_writer.writerow(x.values())
+
+
+def download_file(file_id, output_path=None):
+    """Download the file with the given ID."""
+    # Request a download link for the file
+    request_url = f"{URL}/api/v1/files/download/{file_id}"
+    response = requests.get(request_url, headers=PARAMETERS)
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as ex:
+        raise RuntimeError(f"failed to retrieve file download link ({response.status_code})")
+
+    # Request the contents of the file
+    response_json = response.json()
+    download_url = response_json["url"]
+    download_filename = response_json["file_name"]
+    download_response = requests.get(download_url, stream=True)
+    try:
+        download_response.raise_for_status()
+    except requests.HTTPError as ex:
+        raise RuntimeError(f"failed to download file ({download_response.status_code})")
+
+    # Save the contents of the file to disk
+    output_path = pathlib.Path(output_path or ".")
+    file_path = output_path / download_filename
+    with open(file_path, "wb") as file:
+        for chunk in download_response.iter_content(chunk_size=None):
+            file.write(chunk)
 
 
 def file_by_id(id_, output_path, verbose):
@@ -176,7 +205,7 @@ def main():
         - attributes          Adds an attribute to a specified file
         - set-env             Creates a .env file with passed in API key *NOT SECURE*
     '''))
-    parser.add_argument('command', choices=['files', 'file-id', 'devices', 'device-id', 'account', 'attribute',
+    parser.add_argument('command', choices=['files', 'download', 'file-id', 'devices', 'device-id', 'account', 'attribute',
                                             'set-env'])
     parser.add_argument('--id', '-i', default='', help='Device or File id')
     parser.add_argument('--attributes', '-a', default='', help='What attributes you want to view; default is none, '
@@ -210,6 +239,8 @@ def main():
 
     if args.command == 'account':
         account_info(args.verbose)
+    elif args.command == 'download':
+        download_file(args.id, output)
     elif args.command == 'files':
         all_files(args.attributes, args.limit, output, args.verbose)
         print('output can be found in output/files.csv and output/attributes.csv')
