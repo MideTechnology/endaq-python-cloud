@@ -76,7 +76,7 @@ def download_file(file_id, output_path=None):
     try:
         response.raise_for_status()
     except requests.HTTPError as ex:
-        raise RuntimeError("failed to retrieve file download link")
+        raise RuntimeError(f"failed to retrieve file download link ({response.status_code})")
 
     # Request the contents of the file
     response_json = response.json()
@@ -86,7 +86,7 @@ def download_file(file_id, output_path=None):
     try:
         download_response.raise_for_status()
     except requests.HTTPError as ex:
-        raise RuntimeError("failed to download file")
+        raise RuntimeError(f"failed to download file ({download_response.status_code})")
 
     # Save the contents of the file to disk
     output_path = pathlib.Path(output_path or ".")
