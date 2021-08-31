@@ -49,6 +49,7 @@ Usages:
 --value, -v         Attribute Value
 --verbose, -V       Prints out URL API calls
 
+- endaq-cloud set-env -k <API_KEY>
 - endaq-cloud download -i <FILE_ID> -o <OUTPUT_FOLDER>
 - endaq-cloud files -a <ATTRIBUTES_TO_GET> -l <FILE_OR_DEVICE_OUTPUT_LIMIT>
 - endaq-cloud file-id -i **# additional argument needed**
