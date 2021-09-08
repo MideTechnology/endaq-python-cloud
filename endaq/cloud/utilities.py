@@ -29,7 +29,7 @@ def convert_file_data_to_dataframe(files_data):
         df['attributes'] = df['attributes'].map(lambda x: {attribs['name']: attribs for attribs in x})
 
         unique_attributes_and_types = df['attributes'].map(lambda x: [(k, v['type']) for k, v in x.items()]).values
-        unique_attributes_and_types = set([pair for file_info in unique_attributes_and_types for pair in file_info])
+        unique_attributes_and_types = set(pair for file_info in unique_attributes_and_types for pair in file_info)
 
         for attrib_name, attrib_type_str in unique_attributes_and_types:
             if attrib_type_str == 'float':
