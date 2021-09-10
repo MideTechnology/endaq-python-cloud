@@ -4,7 +4,7 @@ endaq-cloud
 
 The `cloud` subpackage for `endaq-python`
 
-TODO: This.
+This package houses tools and functions to make both interacting with the enDAQ Cloud API and the `enDAQ Cloud <https://cloud.endaq.com>`_ itself easier.
 
 Tools:
 =====
@@ -57,3 +57,10 @@ Usages:
 - endaq-cloud device-id -i **# additional argument needed**
 - endaq-cloud account
 - endaq-cloud attribute -n <ATTRIBUTE_NAME> -t <ATTRIBUTE_TYPE> -v <ATTRIBUTE_VALUE> -i **# additional arguments needed**
+
+
+
+Utilities:
+....
+
+Convienience functions for interacting with the cloud API and the enDAQ custom cloud report generation.
