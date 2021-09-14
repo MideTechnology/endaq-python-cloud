@@ -14,7 +14,8 @@ def convert_file_data_to_dataframe(files_data):
     :return: If files_data is length 0 it will return an empty pandas dataframe if not it will return a
      pandas dataframe of attributes, with the index being the file names, and columns corresponding to the
      attributes present in the given files_data
-
+    """
+    """
     NOTES:
      - This code was originally written with the idea that complex short code is better than more readable code
       that goes on for a while, as it was intended to be a section in example visualization scripts to be 'ignored'.
