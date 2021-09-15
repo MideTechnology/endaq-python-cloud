@@ -1,33 +1,29 @@
-*****
-endaq-cloud
-*****
+# endaq-cloud
 
 The `cloud` subpackage for `endaq-python`
 
 This package houses tools and functions to make both interacting with the enDAQ Cloud API and the `enDAQ Cloud <https://cloud.endaq.com>`_ itself easier.
 
-Tools:
-=====
+## Tools:
 
-API Wrapper:
-....
-The API Wrapper provides a simple command-line interface for accessing basic file and device information from the enDAQ Cloud API. Output of all commands except ``account`` and `attributes` are in ``csv`` files in the ``output`` folder.
+### API Wrapper:
+
+The API Wrapper provides a simple command-line interface for accessing basic file and device information from the enDAQ Cloud API. Output of all commands except `account` and `attributes` are in `csv` files in the `output` folder.
 
 To access the cloud, this tool requires an API key associated with a user's enDAQ Cloud account, which can be provided in two ways:
 
-* (recommended) add to the ``endaq.cloud`` project directory a ``.env`` file, formatted like so::
+* (recommended) add to the `endaq.cloud` project directory a `.env` file, formatted like so:
 
-	API_KEY=<Your Key>
+		API_KEY=<Your Key>
 
-* pass in an API key through the command line using the ``--key`` option
+* pass in an API key through the command line using the `--key` option
 
-.. warning::
-	For security reasons, it is generally discouraged to make an authentication key visible on-screen or accessible through the clipboard, such as when using the ``--key`` option; we provide the ``key`` option solely as a convenience.
+#### warning
+For security reasons, it is generally discouraged to make an authentication key visible on-screen or accessible through the clipboard, such as when using the `--key` option; we provide the `key` option solely as a convenience.
 
 Runs on Python 3.6 and higher
 
-Commands:
-++++++
+#### Commands
 
 - files               Outputs file information for selected number of files and attributes
 - file-id             Outputs file information for file with specified ID to output file
@@ -37,8 +33,8 @@ Commands:
 - attributes          Adds an attribute to a specified file
 - set-env             Creates a .env file with passed in API key *NOT SECURE*
 
-Usages:
-++++++
+#### Usages
+
 -h                  Command Line Help
 --id, -i            File or Device ID
 --limit, -l         File or Device output limit; Max 100 default 50
@@ -60,7 +56,6 @@ Usages:
 
 
 
-Utilities:
-....
+### Utilities
 
 Convienience functions for interacting with the cloud API and the enDAQ custom cloud report generation.
