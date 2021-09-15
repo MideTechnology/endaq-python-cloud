@@ -35,15 +35,18 @@ Runs on Python 3.6 and higher
 
 #### Usages
 
--h                  Command Line Help
---id, -i            File or Device ID
---limit, -l         File or Device output limit; Max 100 default 50
---key, -k           API Key
---attributes, -a    Attributes to be outputted; options = all or att1,att2...; default is none
---name, -n          Attribute Name
---type, -t          Attribute Type; options = int, float, string, boolean
---value, -v         Attribute Value
---verbose, -V       Prints out URL API calls
+Flag | Description 
+---|---
+-h                  | Command Line Help
+--id, -i            | File or Device ID
+--limit, -l         | File or Device output limit; Max 100 default 50
+--key, -k           | API Key
+--attributes, -a    | Attributes to be outputted; options = all or att1,att2...; default is none
+--name, -n          | Attribute Name
+--type, -t          | Attribute Type; options = int, float, string, boolean
+--value, -v         | Attribute Value
+--verbose, -V       | Prints out URL API calls
+
 
 - endaq-cloud set-env -k <API_KEY>
 - endaq-cloud download -i <FILE_ID> -o <OUTPUT_FOLDER>
