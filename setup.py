@@ -9,6 +9,8 @@ INSTALL_REQUIRES = [
     ]
 
 TEST_REQUIRES = [
+    "pytest",
+    "pytest-cov",
     ]
 
 EXAMPLE_REQUIRES = [
