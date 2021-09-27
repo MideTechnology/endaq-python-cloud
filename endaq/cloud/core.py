@@ -3,10 +3,14 @@ Core enDAQ Cloud communication API
 
 TODO: Rewrite docstrings (pref. before implementing methods)
 """
+from datetime import datetime, timedelta
 from typing import Optional, Union
 
 from idelib.dataset import Dataset
+import numpy as np
 from pandas import DataFrame
+import pandas as pd
+import requests
 
 # ==============================================================================
 #
@@ -40,6 +44,11 @@ class EndaqCloud:
             be tested before being returned. A failed test will generate a
             meaningful error message describing the problem.
         """
+        self.api_key = api_key
+        self.domain = env or ENV_PRODUCTION
+
+        if test:
+            requests.get(self.domain + "/api/v1/account/info", headers={"x-api-key": self.api_key}).json()
 
 
     def get_file(self,
@@ -52,7 +61,7 @@ class EndaqCloud:
 
         :param file_id: The file's cloud ID.
         :param local_name:
-        :return: The imported file
+        :return: The imported file, as an `idelib.Dataset`.
         """
 
 
@@ -69,9 +78,51 @@ class EndaqCloud:
             comma-delimited string of attributes) to match.
         :return: A `DataFrame` of file IDs and relevant information.
         """
-        # IDEAS:
-        #   * Accept regex objects as `attributes` (in addition to strings)
-        #   * Accept glob-like patterns (e.g. "GPS Speed:*") using `fnmatch`
+        # NOTE: Use `json_table_to_df()`
+        # THIS IS MOSTLY COLLAB EXAMPLE CODE; NOT FULLY CONVERTED
+
+        if isinstance(attributes, str):
+            attributes = attributes.split(',')
+        attributes = [str(a).strip() for a in attributes]
+        params = {'limit': limit, 'attributes': attributes}
+        response = requests.get(self.domain + "/api/v1/files",
+                                params=params,
+                                headers={"x-api-key": self.api_key})
+
+        df = DataFrame(response.json()['data'])
+
+        # Pull Out Attributes Into Dedicated Columns
+        attributes = pd.DataFrame()
+        for i in range(len(df)):
+            atts = pd.json_normalize(df.attributes.iloc[i]).set_index('name').T.drop(['id', 'type'])
+            atts.loc[i] = atts.loc['value']
+            attributes = pd.concat([attributes, atts.loc[i]], axis=1)
+        df = pd.concat([df, attributes.T], axis=1)
+
+        # Separate GPS
+        locs = df['gpsLocationFull'].str.split(',', 1).to_list()
+        df['Lat'] = np.nan
+        df['Lon'] = np.nan
+        for i in range(len(locs)):
+            if isinstance(locs[i], list):
+                df.loc[i, 'Lat'] = float(locs[i][0])
+                df.loc[i, 'Lon'] = float(locs[i][1])
+
+        # Change type to float for our attribute columns of interest,
+        # Note that this can be done using the type from the attributes in the API response... too lazy
+        att_cols = ['gyroscopeRMSFull', 'gpsSpeedFull',
+                    'accelerationPeakFull', 'velocityRMSFull', 'psuedoVelocityPeakFull',
+                    'temperatureMeanFull', 'accelerationRMSFull', 'microphonoeRMSFull',
+                    'pressureMeanFull', 'accelerometerSampleRateFull', 'displacementRMSFull']
+        for c in att_cols:
+            df[c] = df[c].astype(float)
+
+        # Add Human Readable Datetime Stamps
+        df['Date Recorded'] = pd.to_datetime(df['recording_ts'], unit='s') - timedelta(hours=4)
+        df['Date Uploaded'] = pd.to_datetime(df['created_ts'], unit='s') - timedelta(hours=4)
+        df['Date Modified'] = pd.to_datetime(df['modified_ts'], unit='s') - timedelta(hours=4)
+
+        return df
 
 
     def get_devices(self) -> DataFrame:
@@ -124,9 +175,13 @@ def count_tags(df: DataFrame) -> DataFrame:
 
 def json_table_to_df(data: dict) -> DataFrame:
     """
+    Convert JSON parsed from a custom report to a more user-friendly
+    `pandas.DataFrame`.
 
-    :param data:
-    :return:
+    :param data: A `dict` of data from a custom report's JSON.
+    :return: A formatted `DataFrame`
     """
+    # NOTE: Steve wanted this as a separate function.
+    #  Also: is this already implemented as `endaq.cloud.utilities.convert_file_data_to_dataframe()`?
     # IDEAS:
-    #   * Make this a @classmethod to make EndaqCloud the primary means of access?
+    #   * Make this a @classmethod to make EndaqCloud class and/or instances the primary means of access?
