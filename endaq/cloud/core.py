@@ -47,8 +47,45 @@ class EndaqCloud:
         self.api_key = api_key
         self.domain = env or ENV_PRODUCTION
 
+        self._account_id = self._account_email = None
         if test:
-            requests.get(self.domain + "/api/v1/account/info", headers={"x-api-key": self.api_key}).json()
+            info = self.get_account_info()
+            if not info.get('id') or not info.get('email'):
+                # TODO: change this exception; it's placeholder.
+                raise RuntimeError("Failed to connect to enDAQ Cloud: response was {!r}".format(info))
+
+
+    def get_account_info(self) -> dict:
+        """
+        Get information about the connected account. Sets or updates the
+        values of `account_id` and `account_email`.
+
+        :return: If successful, a dictionary containing (at minimum) the keys
+            `email` and `id`.
+        """
+        response = requests.get(self.domain + "/api/v1/account/info",
+                                headers={"x-api-key": self.api_key}).json()
+        # Cache the ID and email. Don't clobber if the request failed
+        # (just in case - it's unlikely).
+        self._account_id = response.get('id', self._account_id)
+        self._account_email = response.get('email', self._account_email)
+        return response
+
+
+    @property
+    def account_id(self) -> Union[str, None]:
+        """ The enDAQ Cloud account's unique ID. """
+        if self._account_id is None:
+            self.get_account_info()
+        return self._account_id
+
+
+    @property
+    def account_email(self) -> Union[str, None]:
+        """ The email address associated with the enDAQ Cloud account. """
+        if self._account_email is None:
+            self.get_account_info()
+        return self._account_email
 
 
     def get_file(self,
