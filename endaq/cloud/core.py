@@ -11,6 +11,10 @@ import numpy as np
 from pandas import DataFrame
 import pandas as pd
 import requests
+import json
+import re
+import urllib.request
+import shutil
 
 # ==============================================================================
 #
@@ -18,6 +22,7 @@ import requests
 
 ENV_PRODUCTION = "https://qvthkmtukh.execute-api.us-west-2.amazonaws.com/master"
 ENV_STAGING = "https://p377cock71.execute-api.us-west-2.amazonaws.com/staging"
+ENV_DEVELOP = "https://mnsz98xs64.execute-api.us-west-2.amazonaws.com/develop"
 
 # ==============================================================================
 #
@@ -46,6 +51,8 @@ class EndaqCloud:
         """
         self.api_key = api_key
         self.domain = env or ENV_PRODUCTION
+
+        self.file_table = None
 
         self._account_id = self._account_email = None
         if test:
@@ -100,6 +107,18 @@ class EndaqCloud:
         :param local_name:
         :return: The imported file, as an `idelib.Dataset`.
         """
+        file_url = ENV_PRODUCTION + "/api/v1/files/download/" + file_id
+        response = requests.get(file_url, headers={"x-api-key": self.api_key}).json()
+        download_url = response['url']
+        if local_name is None:
+            local_name = response['file_name']
+
+        with urllib.request.urlopen(download_url) as response, open(local_name, 'wb') as out_file:
+            shutil.copyfileobj(response, out_file)
+
+        with open(local_name, 'rb') as f:
+            return Dataset(f)
+
 
 
     def get_file_table(self,
@@ -115,9 +134,6 @@ class EndaqCloud:
             comma-delimited string of attributes) to match.
         :return: A `DataFrame` of file IDs and relevant information.
         """
-        # NOTE: Use `json_table_to_df()`
-        # THIS IS MOSTLY COLLAB EXAMPLE CODE; NOT FULLY CONVERTED
-
         if isinstance(attributes, str):
             attributes = attributes.split(',')
         attributes = [str(a).strip() for a in attributes]
@@ -126,60 +142,57 @@ class EndaqCloud:
                                 params=params,
                                 headers={"x-api-key": self.api_key})
 
-        df = DataFrame(response.json()['data'])
+        files_json_data = response.json()['data']
 
-        # Pull Out Attributes Into Dedicated Columns
-        attributes = pd.DataFrame()
-        for i in range(len(df)):
-            atts = pd.json_normalize(df.attributes.iloc[i]).set_index('name').T.drop(['id', 'type'])
-            atts.loc[i] = atts.loc['value']
-            attributes = pd.concat([attributes, atts.loc[i]], axis=1)
-        df = pd.concat([df, attributes.T], axis=1)
+        self.file_table = json_table_to_df(files_json_data)
 
-        # Separate GPS
-        locs = df['gpsLocationFull'].str.split(',', 1).to_list()
-        df['Lat'] = np.nan
-        df['Lon'] = np.nan
-        for i in range(len(locs)):
-            if isinstance(locs[i], list):
-                df.loc[i, 'Lat'] = float(locs[i][0])
-                df.loc[i, 'Lon'] = float(locs[i][1])
+        return self.file_table
 
-        # Change type to float for our attribute columns of interest,
-        # Note that this can be done using the type from the attributes in the API response... too lazy
-        att_cols = ['gyroscopeRMSFull', 'gpsSpeedFull',
-                    'accelerationPeakFull', 'velocityRMSFull', 'psuedoVelocityPeakFull',
-                    'temperatureMeanFull', 'accelerationRMSFull', 'microphonoeRMSFull',
-                    'pressureMeanFull', 'accelerometerSampleRateFull', 'displacementRMSFull']
-        for c in att_cols:
-            df[c] = df[c].astype(float)
-
-        # Add Human Readable Datetime Stamps
-        df['Date Recorded'] = pd.to_datetime(df['recording_ts'], unit='s') - timedelta(hours=4)
-        df['Date Uploaded'] = pd.to_datetime(df['created_ts'], unit='s') - timedelta(hours=4)
-        df['Date Modified'] = pd.to_datetime(df['modified_ts'], unit='s') - timedelta(hours=4)
-
-        return df
-
-
-    def get_devices(self) -> DataFrame:
+    def get_devices(self, limit: int = 100) -> DataFrame:
         """
         Get dataframe of devices and associated attributes (part_number,
         description, etc.) attached to the account.
 
+        :param limit: The maximum number of files to return.
         :return: A `DataFrame` of recorder information.
         """
+        response = requests.get(self.domain + "/api/v1/files",
+                                params={'limit': limit},
+                                headers={"x-api-key": self.api_key})
+
+        files_json_data = response.json()['data']
+
+        devices = {}
+        for f_data in files_json_data:
+            if f_data['device'] is not None and len(f_data['device']) > 0:
+                if f_data['device']['serial_number_id'] not in devices:
+                    devices[f_data['device']['serial_number_id']] = f_data['device']
+
+        df = pd.DataFrame(devices).T
+        df.set_index('serial_number_id')
+
+        return df
+
+
+
+
 
 
     def set_attributes(self,
                        file_id: Union[int, str],
-                       attributes: dict) -> dict:
+                       attributes: list) -> list:
         """
         Set the 'attributes' (name/value metadata) of a file.
 
         :param file_id: The file's cloud ID.
-        :param attributes:
-        :return: The file's new attributes.
+        :param attributes: A list of dictionaries of the following structure:
+         [{
+             "name": "attr_31",
+             "type" : "float",
+             "value" : 3.3,
+         }]
+        :return: The list of the file's new attributes.
+
         """
         # NOTE: This was called `post_attributes()` in the Confluence docs.
         #  'post' referred to the fact it is a POST request, which is
@@ -188,6 +201,17 @@ class EndaqCloud:
         # IDEAS:
         #   * Use `**kwargs` instead of an `attributes` dict?
         #   * Automatically assume type, unless value is a tuple containing (value, type)
+        for attrib in attributes:
+            attrib['file_id'] = file_id
+
+        response = requests.post(
+            ENV_PRODUCTION + "/api/v1/attributes",
+            headers={"x-api-key": self.api_key},
+            json={'attributes': attributes},
+        )
+
+        return response.json()
+
 
 
 # ==============================================================================
@@ -209,16 +233,64 @@ def count_tags(df: DataFrame) -> DataFrame:
     # IDEAS:
     #   * Make this a @classmethod to make EndaqCloud the primary means of access?
 
+    tags = {}
+    for index, row in df.iterrows():
+        for cur_tag in row['tags']:
+            if cur_tag in tags:
+                tags[cur_tag].append(index)
+            else:
+                tags[cur_tag] = [index]
 
-def json_table_to_df(data: dict) -> DataFrame:
+    for tag in tags:
+        tags[tag] = [len(tags[tag]), ''.join(["'", "','".join(tags[tag]), "'"])]
+
+    return pd.DataFrame(tags, index=pd.Index(['count', 'files'], name='tag')).T
+
+
+
+def json_table_to_df(data: list) -> DataFrame:
     """
     Convert JSON parsed from a custom report to a more user-friendly
     `pandas.DataFrame`.
 
-    :param data: A `dict` of data from a custom report's JSON.
+    :param data: A `list` of data from a custom report's JSON.
     :return: A formatted `DataFrame`
     """
     # NOTE: Steve wanted this as a separate function.
     #  Also: is this already implemented as `endaq.cloud.utilities.convert_file_data_to_dataframe()`?
     # IDEAS:
     #   * Make this a @classmethod to make EndaqCloud class and/or instances the primary means of access?
+    df = pd.DataFrame(data)
+    df['attributes'] = df['attributes'].map(lambda x: {attribs['name']: attribs for attribs in x})
+
+    unique_attributes_and_types = df['attributes'].map(lambda x: [(k, v['type']) for k, v in x.items()]).values
+    unique_attributes_and_types = set(pair for file_info in unique_attributes_and_types for pair in file_info)
+
+    for attrib_name, attrib_type_str in unique_attributes_and_types:
+        if attrib_type_str == 'float':
+            df[attrib_name] = df['attributes'].map(
+                lambda x: None if len(x) == 0 or attrib_name not in x else float(x[attrib_name]['value']))
+        elif attrib_type_str == 'string':
+            try:  # Try and parse the JSON string into an array of floats
+                df[attrib_name] = df['attributes'].map(
+                    lambda x: [] if len(x) == 0 or attrib_name not in x else np.array(
+                        json.loads(re.sub(r'\bnan\b', 'NaN', x[attrib_name]['value'])), dtype=np.float32))
+            except json.JSONDecodeError:  # Save it as a String if it can't be converted to a float array
+                df[attrib_name] = df['attributes'].map(
+                    lambda x: "" if len(x) == 0 or attrib_name not in x else x[attrib_name]['value'])
+
+    # Convert the columns which represent times to pandas datetime type
+    for time_col_name in ['recording_ts', 'created_ts', 'modified_ts', 'archived_ts']:
+        df[time_col_name] = pd.to_datetime(df[time_col_name], unit='s')
+
+    # Add the GPS coordinates as 2 seperate latitude and longitude columns
+    gps_coord_series = df['gpsLocationFull'].map(
+        lambda x: np.array(x.split(','), dtype=np.float32) if len(x) else np.array(2 * [np.nan],
+                                                                                   dtype=np.float32))
+
+    df['latitudes'] = gps_coord_series.map(lambda x: x[0])
+    df['longitudes'] = gps_coord_series.map(lambda x: x[1])
+
+    df = df.set_index('file_name')
+
+    return df
