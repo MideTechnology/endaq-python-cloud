@@ -43,8 +43,11 @@ class EndaqCloud:
         Constructor for an `EndaqCloud` object, which provides access to an
         enDAQ Cloud account.
 
-        :param api_key:
-        :param env:
+        :param api_key: The Endaq Cloud API associated with your cloud.endaq.com account.
+         If you do not have one created yet, they can be created on the following web page:
+         https://cloud.endaq.com/account/api-keys
+        :param env: The cloud environment to connect to, which can be production, staging, or development.
+         These can be easily accessed with the variables ENV_PRODUCTION, ENV_STAGING, and ENV_DEVELOP
         :param test: If `True` (default), the connection to enDAQ Cloud will
             be tested before being returned. A failed test will generate a
             meaningful error message describing the problem.
@@ -107,7 +110,7 @@ class EndaqCloud:
         :param local_name:
         :return: The imported file, as an `idelib.Dataset`.
         """
-        file_url = ENV_PRODUCTION + "/api/v1/files/download/" + file_id
+        file_url = self.domain + "/api/v1/files/download/" + file_id
         response = requests.get(file_url, headers={"x-api-key": self.api_key}).json()
         download_url = response['url']
         if local_name is None:
@@ -116,8 +119,9 @@ class EndaqCloud:
         with urllib.request.urlopen(download_url) as response, open(local_name, 'wb') as out_file:
             shutil.copyfileobj(response, out_file)
 
-        with open(local_name, 'rb') as f:
-            return Dataset(f)
+        f = open(local_name, 'rb')
+
+        return Dataset(f)
 
 
 
@@ -141,8 +145,10 @@ class EndaqCloud:
         response = requests.get(self.domain + "/api/v1/files",
                                 params=params,
                                 headers={"x-api-key": self.api_key})
-
-        files_json_data = response.json()['data']
+        try:
+            files_json_data = response.json()['data']
+        except KeyError:
+            raise KeyError("the 'data' attribute was not present in the json response from the cloud.")
 
         self.file_table = json_table_to_df(files_json_data)
 
@@ -160,7 +166,10 @@ class EndaqCloud:
                                 params={'limit': limit},
                                 headers={"x-api-key": self.api_key})
 
-        files_json_data = response.json()['data']
+        try:
+            files_json_data = response.json()['data']
+        except KeyError:
+            raise KeyError("the 'data' attribute was not present in the json response from the cloud.")
 
         devices = {}
         for f_data in files_json_data:
@@ -169,7 +178,9 @@ class EndaqCloud:
                     devices[f_data['device']['serial_number_id']] = f_data['device']
 
         df = pd.DataFrame(devices).T
-        df.set_index('serial_number_id')
+
+        if len(df.columns):
+            df.set_index('serial_number_id')
 
         return df
 
@@ -205,7 +216,7 @@ class EndaqCloud:
             attrib['file_id'] = file_id
 
         response = requests.post(
-            ENV_PRODUCTION + "/api/v1/attributes",
+            self.domain + "/api/v1/attributes",
             headers={"x-api-key": self.api_key},
             json={'attributes': attributes},
         )
