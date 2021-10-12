@@ -1,7 +1,5 @@
 """
 Core enDAQ Cloud communication API
-
-TODO: Rewrite docstrings (pref. before implementing methods)
 """
 from datetime import datetime, timedelta
 from typing import Optional, Union
