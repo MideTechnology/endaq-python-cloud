@@ -16,7 +16,7 @@ EXAMPLE_REQUIRES = [
 
 setuptools.setup(
         name='endaq-cloud',
-        version='1.0.0b1',
+        version='1.0.0',
         author='Mide Technology',
         author_email='help@mide.com',
         description='The cloud subpackage for endaq-python',
