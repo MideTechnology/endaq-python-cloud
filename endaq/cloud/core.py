@@ -195,11 +195,15 @@ class EndaqCloud:
 
         :param file_id: The file's cloud ID.
         :param attributes: A list of dictionaries of the following structure:
-         [{
-             "name": "attr_31",
-             "type" : "float",
-             "value" : 3.3,
-         }]
+
+        .. code-block:: python
+
+            [{
+                "name": "attr_31",
+                "type" : "float",
+                "value" : 3.3,
+            }]
+
         :return: The list of the file's new attributes.
 
         """
