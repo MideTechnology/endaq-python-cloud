@@ -102,7 +102,8 @@ class EndaqCloud:
         """
         Download the specified file to local_name if provided, use the file
         name from the cloud if no local name is provided.
-        TODO: This should be made to match `endaq.ide.get_doc()`
+        
+        .. todo:: This should be made to match `endaq.ide.get_doc()`
 
         :param file_id: The file's cloud ID.
         :param local_name:
@@ -195,11 +196,15 @@ class EndaqCloud:
 
         :param file_id: The file's cloud ID.
         :param attributes: A list of dictionaries of the following structure:
-         [{
-             "name": "attr_31",
-             "type" : "float",
-             "value" : 3.3,
-         }]
+
+        .. code-block:: python
+
+            [{
+                "name": "attr_31",
+                "type" : "float",
+                "value" : 3.3,
+            }]
+
         :return: The list of the file's new attributes.
 
         """
