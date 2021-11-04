@@ -106,7 +106,9 @@ class EndaqCloud:
         .. todo:: This should be made to match `endaq.ide.get_doc()`
 
         :param file_id: The file's cloud ID.
-        :param local_name:
+        :param local_name: The downloaded file's destination pathname; defaults
+            to the file's original basename & located in the directory in which
+            the Python interpreter was launched
         :return: The imported file, as an `idelib.Dataset`.
         """
         file_url = self.domain + "/api/v1/files/download/" + file_id
