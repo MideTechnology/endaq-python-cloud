@@ -7,7 +7,6 @@ from typing import Optional, Union
 
 from idelib.dataset import Dataset
 import numpy as np
-from pandas import DataFrame
 import pandas as pd
 import requests
 import json
@@ -171,7 +170,7 @@ class EndaqCloud:
 
     def get_file_table(self,
                        attributes: Union[list, str] = "all",
-                       limit: int = 100) -> DataFrame:
+                       limit: int = 100) -> pd.DataFrame:
         """
         Get a table of the data that would be similar to that you'd get doing
         the CSV export on the my recordings page, up to the first `limit`
@@ -188,8 +187,7 @@ class EndaqCloud:
 
         return self.file_table
 
-
-    def get_devices(self, limit: int = 100) -> DataFrame:
+    def get_devices(self, limit: int = 100) -> pd.DataFrame:
         """
         Get dataframe of devices and associated attributes (part_number,
         description, etc.) attached to the account.
@@ -253,7 +251,7 @@ class EndaqCloud:
 
 
 
-def count_tags(df: DataFrame) -> DataFrame:
+def count_tags(df: pd.DataFrame) -> pd.DataFrame:
     """
     Given the dataframe returned by `EndaqCloud.get_file_table()`, provide
     some info on the tags of the files in that account.
@@ -282,7 +280,7 @@ def count_tags(df: DataFrame) -> DataFrame:
 
 
 
-def json_table_to_df(data: list) -> DataFrame:
+def json_table_to_df(data: list) -> pd.DataFrame:
     """
     Convert JSON parsed from a custom report to a more user-friendly
     `pandas.DataFrame`.
