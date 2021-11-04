@@ -80,7 +80,7 @@ class EndaqCloud:
 
 
     @property
-    def account_id(self) -> Union[str, None]:
+    def account_id(self) -> Optional[str]:
         """ The enDAQ Cloud account's unique ID. """
         if self._account_id is None:
             self.get_account_info()
@@ -88,7 +88,7 @@ class EndaqCloud:
 
 
     @property
-    def account_email(self) -> Union[str, None]:
+    def account_email(self) -> Optional[str]:
         """ The email address associated with the enDAQ Cloud account. """
         if self._account_email is None:
             self.get_account_info()
