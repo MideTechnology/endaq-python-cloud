@@ -3,6 +3,7 @@ from types import FunctionType
 import plotly.io as pio
 import json
 
+from .core import ENV_PRODUCTION, ENV_STAGING, ENV_DEVELOP
 
 def create_cloud_dashboard_output(name_to_fig: dict) -> str:
     """
@@ -42,11 +43,11 @@ def produce_dashboard_plots(dashboard_script_fn: FunctionType, api_key: str, env
     :return: A list of the 4 plotly figures produced
     """
     if environment == 'master':
-        api_access_url = 'https://qvthkmtukh.execute-api.us-west-2.amazonaws.com/master/api/v1/'
+        api_access_url = ENV_PRODUCTION + '/api/v1/'
     elif environment == 'staging':
-        api_access_url = 'https://p377cock71.execute-api.us-west-2.amazonaws.com/staging/api/v1/'
+        api_access_url = ENV_STAGING + '/api/v1/'
     elif environment == 'develop':
-        api_access_url = 'https://mnsz98xs64.execute-api.us-west-2.amazonaws.com/develop/api/v1/'
+        api_access_url = ENV_DEVELOP + '/api/v1/'
     else:
         raise ValueError("Only 'master', 'staging', and 'develop' may be given for the 'environment' parameter, "
                          f" but {environment} was given instead.")
