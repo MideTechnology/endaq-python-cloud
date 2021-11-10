@@ -122,11 +122,12 @@ class EndaqCloud:
 
     def _get_files_json_response(self, limit: int = 100, attributes: Union[list, str] = "all") -> list:
         """
-        ########################################################################################################################
+        A function to get attribute data about the most recent files uploaded to the cloud.
 
-        :param limit: ########################################################################################################################
-        :param attributes: ########################################################################################################################
-        :return: ########################################################################################################################
+        :param limit: The maximum number of files to get info for.  The most recent files will be gotten
+        :param attributes: Either a list of strings denoting the attributes to get, or a string with comma seperated
+         attribute names to get.  If 'all' is specified (the default) then all attributes will be gotten
+        :return: A list of the json objects
         """
         if not isinstance(limit, int):
             raise TypeError(f"the `limit` parameter must be type 'int' but type '{type(limit)}' was given.")
