@@ -5,6 +5,13 @@ import json
 
 from .core import ENV_PRODUCTION, ENV_STAGING, ENV_DEVELOP
 
+
+__all__ = [
+    'create_cloud_dashboard_output',
+    'produce_dashboard_plots',
+]
+
+
 def create_cloud_dashboard_output(name_to_fig: dict) -> str:
     """
     A function which makes producing the json based string used to produce custom enDAQ Cloud report
