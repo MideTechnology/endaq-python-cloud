@@ -6,6 +6,10 @@ with open('README.md', 'r', encoding='utf-8') as fh:
 INSTALL_REQUIRES = [
     "requests",
     "python-dotenv",
+    "idelib",
+    "plotly",
+    "numpy",
+    "pandas",
     ]
 
 TEST_REQUIRES = [
