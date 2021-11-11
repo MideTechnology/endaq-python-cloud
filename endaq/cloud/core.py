@@ -13,6 +13,7 @@ import re
 import urllib.request
 import shutil
 
+
 __all__ = [
     'EndaqCloud',
     'count_tags',
@@ -120,7 +121,51 @@ class EndaqCloud:
 
         return Dataset(f)
 
+    def _get_files_json_response(self, limit: int = 100, attributes: Union[list, str] = "all") -> list:
+        """
+        A function to get attribute data about the most recent files uploaded to the cloud.
 
+        :param limit: The maximum number of files to get info for.  The most recent files will be gotten
+        :param attributes: Either a list of strings denoting the attributes to get, or a string with comma seperated
+         attribute names to get.  If 'all' is specified (the default) then all attributes will be gotten
+        :return: A list of the json objects
+        """
+        if not isinstance(limit, int):
+            raise TypeError(f"the `limit` parameter must be type 'int' but type '{type(limit)}' was given.")
+
+        if limit < 1:
+            raise ValueError(f"the `limit` parameter must be at least 1, but '{limit}' was given.")
+
+        if isinstance(attributes, str):
+            attributes = attributes.split(',')
+        attributes = [str(a).strip() for a in attributes]
+
+        j = 0
+        json_data = []
+        while True:
+            params = {
+                'limit': min(100, limit - j*100),
+                'attributes': attributes,
+            }
+
+            if j != 0:
+                params['next_token'] = response["nextToken"]
+
+            response = requests.get(self.domain + "/api/v1/files",
+                                    params=params,
+                                    headers={"x-api-key": self.api_key}).json()
+
+            try:
+                json_data += response['data']
+            except KeyError:
+                raise KeyError("the 'data' attribute was not present in the json response from the cloud.")
+
+            j += 1
+
+            if response["nextToken"] is None or j * 100 >= limit:
+                break
+
+        return json_data
 
     def get_file_table(self,
                        attributes: Union[list, str] = "all",
@@ -135,21 +180,12 @@ class EndaqCloud:
             comma-delimited string of attributes) to match.
         :return: A `DataFrame` of file IDs and relevant information.
         """
-        if isinstance(attributes, str):
-            attributes = attributes.split(',')
-        attributes = [str(a).strip() for a in attributes]
-        params = {'limit': limit, 'attributes': attributes}
-        response = requests.get(self.domain + "/api/v1/files",
-                                params=params,
-                                headers={"x-api-key": self.api_key})
-        try:
-            files_json_data = response.json()['data']
-        except KeyError:
-            raise KeyError("the 'data' attribute was not present in the json response from the cloud.")
+        json_data = self._get_files_json_response(limit=limit, attributes=attributes)
 
-        self.file_table = json_table_to_df(files_json_data)
+        self.file_table = json_table_to_df(json_data)
 
         return self.file_table
+
 
     def get_devices(self, limit: int = 100) -> DataFrame:
         """
@@ -159,17 +195,10 @@ class EndaqCloud:
         :param limit: The maximum number of files to return.
         :return: A `DataFrame` of recorder information.
         """
-        response = requests.get(self.domain + "/api/v1/files",
-                                params={'limit': limit},
-                                headers={"x-api-key": self.api_key})
-
-        try:
-            files_json_data = response.json()['data']
-        except KeyError:
-            raise KeyError("the 'data' attribute was not present in the json response from the cloud.")
+        json_data = self._get_files_json_response(limit=limit, attributes=[])
 
         devices = {}
-        for f_data in files_json_data:
+        for f_data in json_data:
             if f_data['device'] is not None and len(f_data['device']) > 0:
                 if f_data['device']['serial_number_id'] not in devices:
                     devices[f_data['device']['serial_number_id']] = f_data['device']
@@ -180,11 +209,6 @@ class EndaqCloud:
             df.set_index('serial_number_id')
 
         return df
-
-
-
-
-
 
     def set_attributes(self,
                        file_id: Union[int, str],
@@ -225,10 +249,6 @@ class EndaqCloud:
         return response.json()
 
 
-
-# ==============================================================================
-#
-# ==============================================================================
 
 
 def count_tags(df: DataFrame) -> DataFrame:
@@ -293,15 +313,16 @@ def json_table_to_df(data: list) -> DataFrame:
 
     # Convert the columns which represent times to pandas datetime type
     for time_col_name in ['recording_ts', 'created_ts', 'modified_ts', 'archived_ts']:
-        df[time_col_name] = pd.to_datetime(df[time_col_name], unit='s')
+        if time_col_name in df:
+            df[time_col_name] = pd.to_datetime(df[time_col_name], unit='s')
 
-    # Add the GPS coordinates as 2 seperate latitude and longitude columns
-    gps_coord_series = df['gpsLocationFull'].map(
-        lambda x: np.array(x.split(','), dtype=np.float32) if len(x) else np.array(2 * [np.nan],
-                                                                                   dtype=np.float32))
-
-    df['latitudes'] = gps_coord_series.map(lambda x: x[0])
-    df['longitudes'] = gps_coord_series.map(lambda x: x[1])
+    if 'gpsLocationFull' in df:
+        # Add the GPS coordinates as 2 seperate latitude and longitude columns
+        gps_coord_series = df['gpsLocationFull'].map(
+            lambda x: np.array(x.split(','), dtype=np.float32) if len(x) else np.array(2 * [np.nan],
+                                                                                       dtype=np.float32))
+        df['latitudes'] = gps_coord_series.map(lambda x: x[0])
+        df['longitudes'] = gps_coord_series.map(lambda x: x[1])
 
     df = df.set_index('file_name')
 
