@@ -34,7 +34,7 @@ def create_cloud_dashboard_output(name_to_fig: dict) -> str:
     return "[" + ", ".join([v.to_json()[:-1] + ', "title": "' + k + '"}' for k, v in name_to_fig.items()]) + "]"
 
 
-def produce_dashboard_plots(dashboard_script_fn: FunctionType, api_key: str, environment: str = 'master',
+def produce_dashboard_plots(dashboard_script_fn: FunctionType, api_key: str, environment: str = 'production',
                             display_plots: bool = True) -> list:
     """
     A function used to simulate a run of a desired enDAQ Cloud custom report script without needing to use
@@ -44,19 +44,19 @@ def produce_dashboard_plots(dashboard_script_fn: FunctionType, api_key: str, env
      the exact code that would be put into a enDAQ Cloud custom report script, followed by one final line:
      `return output`
     :param api_key: The enDAQ Cloud API key
-    :param environment: The version of the enDAQ Cloud to communicate with, the options are 'master', 'staging',
+    :param environment: The version of the enDAQ Cloud to communicate with, the options are 'production', 'staging',
      or 'develop'.  This should only be used internally at Mide
     :param display_plots: If the plots being produced should be displayed
     :return: A list of the 4 plotly figures produced
     """
-    if environment == 'master':
+    if environment == 'production':
         api_access_url = ENV_PRODUCTION + '/api/v1/'
     elif environment == 'staging':
         api_access_url = ENV_STAGING + '/api/v1/'
     elif environment == 'develop':
         api_access_url = ENV_DEVELOP + '/api/v1/'
     else:
-        raise ValueError("Only 'master', 'staging', and 'develop' may be given for the 'environment' parameter, "
+        raise ValueError("Only 'production', 'staging', and 'develop' may be given for the 'environment' parameter, "
                          f" but {environment} was given instead.")
 
     parameters = {"x-api-key": api_key}
